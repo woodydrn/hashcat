@@ -7,7 +7,7 @@
            |_____|     /___________/     |_____|  /_____/        /_______|
                  :                             :                         :
 
-hashcat v5.1.0
+hashcat v6.0.0
 ==============
 
 AMD GPUs on Linux require "RadeonOpenCompute (ROCm)" Software Platform (3.1 or later)
@@ -24,7 +24,7 @@ NVIDIA GPUs require "NVIDIA Driver" (440.64 or later) and "CUDA Toolkit" (9.0 or
 - Free
 - Open-Source (MIT License)
 - Multi-OS (Linux, Windows and macOS)
-- Multi-Platform (CPU, GPU, DSP, FPGA, etc., everything that comes with an OpenCL runtime)
+- Multi-Platform (CPU, GPU, APU, etc., everything that comes with an OpenCL runtime)
 - Multi-Hash (Cracking multiple hashes at the same time)
 - Multi-Devices (Utilizing multiple devices in same system)
 - Multi-Device-Types (Utilizing mixed device types in same system)
@@ -97,6 +97,7 @@ NVIDIA GPUs require "NVIDIA Driver" (440.64 or later) and "CUDA Toolkit" (9.0 or
 - sha1(md5($pass.$salt))
 - sha1(md5(md5($pass)))
 - sha1(sha1($pass))
+- sha1(sha1($pass).$salt)
 - sha1(utf16le($pass).$salt)
 - sha256($pass.$salt)
 - sha256($salt.$pass)
@@ -163,6 +164,7 @@ NVIDIA GPUs require "NVIDIA Driver" (440.64 or later) and "CUDA Toolkit" (9.0 or
 - Telegram Mobile App Passcode (SHA256)
 - PostgreSQL CRAM (MD5)
 - MySQL CRAM (SHA1)
+- XMPP SCRAM
 - RACF
 - AIX {smd5}
 - AIX {ssha1}
@@ -251,6 +253,7 @@ NVIDIA GPUs require "NVIDIA Driver" (440.64 or later) and "CUDA Toolkit" (9.0 or
 - Android FDE (Samsung DEK)
 - Android FDE <= 4.3
 - Apple File System (APFS)
+- BestCrypt v3 Volume Encryption
 - TrueCrypt
 - PDF 1.1 - 1.3 (Acrobat 2 - 4)
 - PDF 1.1 - 1.3 (Acrobat 2 - 4), collider #1
@@ -258,6 +261,7 @@ NVIDIA GPUs require "NVIDIA Driver" (440.64 or later) and "CUDA Toolkit" (9.0 or
 - PDF 1.4 - 1.6 (Acrobat 5 - 8)
 - PDF 1.7 Level 3 (Acrobat 9)
 - PDF 1.7 Level 8 (Acrobat 10 - 11)
+- Apple iWork
 - MS Office 2007
 - MS Office 2010
 - MS Office 2013
@@ -269,10 +273,14 @@ NVIDIA GPUs require "NVIDIA Driver" (440.64 or later) and "CUDA Toolkit" (9.0 or
 - MS Office <= 2003 $3, SHA1 + RC4, collider #2
 - Open Document Format (ODF) 1.2 (SHA-256, AES)
 - Open Document Format (ODF) 1.1 (SHA-1, Blowfish)
+- Apple Keychain
 - Apple Secure Notes
 - JKS Java Key Store Private Keys (SHA1)
+- PKCS#8 Private Keys
+- RSA/DSA/EC/OpenSSH Private Keys
 - 1Password, agilekeychain
 - 1Password, cloudkeychain
+- Bitwarden
 - Password Safe v2
 - Password Safe v3
 - LastPass + LastPass sniffed
@@ -289,6 +297,7 @@ NVIDIA GPUs require "NVIDIA Driver" (440.64 or later) and "CUDA Toolkit" (9.0 or
 - MultiBit HD (scrypt)
 - 7-Zip
 - RAR3-hp
+- RAR3-p
 - RAR5
 - PKZIP (Compressed)
 - PKZIP (Compressed Multi-File)
@@ -297,12 +306,17 @@ NVIDIA GPUs require "NVIDIA Driver" (440.64 or later) and "CUDA Toolkit" (9.0 or
 - PKZIP (Uncompressed)
 - PKZIP Master Key
 - PKZIP Master Key (6 byte optimization)
+- SecureZIP AES-128
+- SecureZIP AES-192
+- SecureZIP AES-256
 - iTunes backup < 10.0
 - iTunes backup >= 10.0
 - WinZip
 - Android Backup
-- AxCrypt
-- AxCrypt in-memory SHA1
+- AxCrypt 1
+- AxCrypt 1 in-memory SHA1
+- AxCrypt 2 AES-128
+- AxCrypt 2 AES-256
 - WBB3 (Woltlab Burning Board)
 - vBulletin < v3.8.5
 - vBulletin >= v3.8.5
@@ -343,6 +357,8 @@ NVIDIA GPUs require "NVIDIA Driver" (440.64 or later) and "CUDA Toolkit" (9.0 or
 - Apple
 - Intel
 - NVidia
+- POCL
+- ROCm
 
 ##
 ## Supported OpenCL device types

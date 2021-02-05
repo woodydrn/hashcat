@@ -16,7 +16,7 @@ static const u32   DGST_POS1      = 4;
 static const u32   DGST_POS2      = 2;
 static const u32   DGST_POS3      = 1;
 static const u32   DGST_SIZE      = DGST_SIZE_4_5;
-static const u32   HASH_CATEGORY  = HASH_CATEGORY_PASSWORD_MANAGER;
+static const u32   HASH_CATEGORY  = HASH_CATEGORY_PRIVATE_KEY;
 static const char *HASH_NAME      = "JKS Java Key Store Private Keys (SHA1)";
 static const u64   KERN_TYPE      = 15500;
 static const u32   OPTI_TYPE      = OPTI_TYPE_ZERO_BYTE
@@ -197,9 +197,7 @@ int module_hash_decode (MAYBE_UNUSED const hashconfig_t *hashconfig, MAYBE_UNUSE
 
   // alias
 
-  const u8 *alias_pos = token.buf[6];
-
-  strncpy ((char *) jks_sha1->alias, (const char *) alias_pos, 64);
+  memcpy ((char *) jks_sha1->alias, (const char *) token.buf[6], token.len[6]);
 
   // fake salt
 
@@ -237,6 +235,10 @@ int module_hash_encode (MAYBE_UNUSED const hashconfig_t *hashconfig, MAYBE_UNUSE
 
   u8 *der = (u8 *) jks_sha1->der;
 
+  char alias[65] = { 0 };
+
+  memcpy (alias, (char *) jks_sha1->alias, 64);
+
   const int line_len = snprintf (line_buf, line_size, "%s*%08X%08X%08X%08X%08X*%08X%08X%08X%08X%08X*%s*%02X*%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X*%s",
     SIGNATURE_JKS_SHA1,
     byte_swap_32 (jks_sha1->checksum[0]),
@@ -265,7 +267,7 @@ int module_hash_encode (MAYBE_UNUSED const hashconfig_t *hashconfig, MAYBE_UNUSE
     der[17],
     der[18],
     der[19],
-    (char *) jks_sha1->alias
+    alias
   );
 
   return line_len;
@@ -309,6 +311,9 @@ void module_init (module_ctx_t *module_ctx)
   module_ctx->module_hashes_count_min         = MODULE_DEFAULT;
   module_ctx->module_hashes_count_max         = MODULE_DEFAULT;
   module_ctx->module_hlfmt_disable            = MODULE_DEFAULT;
+  module_ctx->module_hook_extra_param_size    = MODULE_DEFAULT;
+  module_ctx->module_hook_extra_param_init    = MODULE_DEFAULT;
+  module_ctx->module_hook_extra_param_term    = MODULE_DEFAULT;
   module_ctx->module_hook12                   = MODULE_DEFAULT;
   module_ctx->module_hook23                   = MODULE_DEFAULT;
   module_ctx->module_hook_salt_size           = MODULE_DEFAULT;

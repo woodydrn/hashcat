@@ -599,6 +599,7 @@ int user_options_sanity (hashcat_ctx_t *hashcat_ctx)
      && (user_options->attack_mode != ATTACK_MODE_BF)
      && (user_options->attack_mode != ATTACK_MODE_HYBRID1)
      && (user_options->attack_mode != ATTACK_MODE_HYBRID2)
+     && (user_options->attack_mode != ATTACK_MODE_ASSOCIATION)
      && (user_options->attack_mode != ATTACK_MODE_NONE))
     {
       event_log_error (hashcat_ctx, "Invalid attack mode (-a) value specified.");
@@ -771,6 +772,20 @@ int user_options_sanity (hashcat_ctx_t *hashcat_ctx)
     return -1;
   }
 
+  if ((user_options->increment == true) && (user_options->attack_mode == ATTACK_MODE_ASSOCIATION))
+  {
+    event_log_error (hashcat_ctx, "Increment is not allowed in attack mode 9 (association).");
+
+    return -1;
+  }
+
+  if ((user_options->remove == true) && (user_options->attack_mode == ATTACK_MODE_ASSOCIATION))
+  {
+    event_log_error (hashcat_ctx, "Remove is not allowed in attack mode 9 (association).");
+
+    return -1;
+  }
+
   if ((user_options->increment == false) && (user_options->increment_min_chgd == true))
   {
     event_log_error (hashcat_ctx, "Increment-min is only supported when combined with -i/--increment.");
@@ -794,9 +809,9 @@ int user_options_sanity (hashcat_ctx_t *hashcat_ctx)
 
   if ((user_options->rp_files_cnt > 0) || (user_options->rp_gen > 0))
   {
-    if (user_options->attack_mode != ATTACK_MODE_STRAIGHT)
+    if ((user_options->attack_mode != ATTACK_MODE_STRAIGHT) && (user_options->attack_mode != ATTACK_MODE_ASSOCIATION))
     {
-      event_log_error (hashcat_ctx, "Use of -r/--rules-file and -g/--rules-generate only allowed in attack mode 0.");
+      event_log_error (hashcat_ctx, "Use of -r/--rules-file and -g/--rules-generate only allowed in attack mode 0 or 9.");
 
       return -1;
     }
@@ -1048,6 +1063,13 @@ int user_options_sanity (hashcat_ctx_t *hashcat_ctx)
 
       return -1;
     }
+
+    if (user_options->attack_mode == ATTACK_MODE_ASSOCIATION)
+    {
+      event_log_error (hashcat_ctx, "Use of --induction-dir is not allowed in attack mode 9 (association).");
+
+      return -1;
+    }
   }
 
   if (user_options->spin_damp > 100)
@@ -1167,7 +1189,7 @@ int user_options_sanity (hashcat_ctx_t *hashcat_ctx)
      || (user_options->custom_charset_3 != NULL)
      || (user_options->custom_charset_4 != NULL))
     {
-      if (user_options->attack_mode == ATTACK_MODE_STRAIGHT)
+      if ((user_options->attack_mode == ATTACK_MODE_STRAIGHT) || (user_options->attack_mode == ATTACK_MODE_ASSOCIATION))
       {
         event_log_error (hashcat_ctx, "Custom charsets are not supported in benchmark mode.");
 
@@ -1312,6 +1334,13 @@ int user_options_sanity (hashcat_ctx_t *hashcat_ctx)
       return -1;
     }
 
+    if (user_options->attack_mode == ATTACK_MODE_ASSOCIATION)
+    {
+      event_log_error (hashcat_ctx, "Custom charsets are not supported in attack mode 9 (association).");
+
+      return -1;
+    }
+
     // detect if mask was specified:
 
     bool mask_is_missing = true;
@@ -1420,6 +1449,13 @@ int user_options_sanity (hashcat_ctx_t *hashcat_ctx)
         show_error = false;
       }
     }
+    else if (user_options->attack_mode == ATTACK_MODE_ASSOCIATION)
+    {
+      if (user_options->hc_argc == 1)
+      {
+        show_error = false;
+      }
+    }
   }
   else if (user_options->stdout_flag == true)
   {
@@ -1451,6 +1487,13 @@ int user_options_sanity (hashcat_ctx_t *hashcat_ctx)
       }
     }
     else if (user_options->attack_mode == ATTACK_MODE_HYBRID2)
+    {
+      if (user_options->hc_argc >= 1)
+      {
+        show_error = false;
+      }
+    }
+    else if (user_options->attack_mode == ATTACK_MODE_ASSOCIATION)
     {
       if (user_options->hc_argc >= 1)
       {
@@ -1510,6 +1553,13 @@ int user_options_sanity (hashcat_ctx_t *hashcat_ctx)
       }
     }
     else if (user_options->attack_mode == ATTACK_MODE_HYBRID2)
+    {
+      if (user_options->hc_argc >= 2)
+      {
+        show_error = false;
+      }
+    }
+    else if (user_options->attack_mode == ATTACK_MODE_ASSOCIATION)
     {
       if (user_options->hc_argc >= 2)
       {
@@ -1727,6 +1777,10 @@ void user_options_preprocess (hashcat_ctx_t *hashcat_ctx)
     {
       user_options->kernel_loops = KERNEL_COMBS;
     }
+    else if (user_options->attack_mode == ATTACK_MODE_ASSOCIATION)
+    {
+      user_options->kernel_loops = KERNEL_RULES;
+    }
   }
 
   if (user_options->backend_info == true)
@@ -1828,6 +1882,13 @@ void user_options_preprocess (hashcat_ctx_t *hashcat_ctx)
         user_options->increment = true;
       }
     }
+  }
+
+  // association limitations
+
+  if (user_options->attack_mode == ATTACK_MODE_ASSOCIATION)
+  {
+    user_options->potfile_disable = true;
   }
 }
 
@@ -1979,6 +2040,7 @@ void user_options_extra_init (hashcat_ctx_t *hashcat_ctx)
     case ATTACK_MODE_BF:       user_options_extra->attack_kern = ATTACK_KERN_BF;       break;
     case ATTACK_MODE_HYBRID1:  user_options_extra->attack_kern = ATTACK_KERN_COMBI;    break;
     case ATTACK_MODE_HYBRID2:  user_options_extra->attack_kern = ATTACK_KERN_COMBI;    break;
+    case ATTACK_MODE_ASSOCIATION:  user_options_extra->attack_kern = ATTACK_KERN_STRAIGHT; break;
   }
 
   // rules
@@ -2441,6 +2503,53 @@ int user_options_check_files (hashcat_ctx_t *hashcat_ctx)
       }
     }
   }
+  else if (user_options->attack_mode == ATTACK_MODE_ASSOCIATION)
+  {
+    for (int i = 0; i < user_options_extra->hc_workc; i++)
+    {
+      char *wlfile = user_options_extra->hc_workv[i];
+
+      if (hc_path_exist (wlfile) == false)
+      {
+        event_log_error (hashcat_ctx, "%s: %s", wlfile, strerror (errno));
+
+        return -1;
+      }
+    }
+
+    for (int i = 0; i < (int) user_options->rp_files_cnt; i++)
+    {
+      char *rp_file = user_options->rp_files[i];
+
+      if (hc_path_exist (rp_file) == false)
+      {
+        event_log_error (hashcat_ctx, "%s: %s", rp_file, strerror (errno));
+
+        return -1;
+      }
+
+      if (hc_path_is_directory (rp_file) == true)
+      {
+        event_log_error (hashcat_ctx, "%s: A directory cannot be used as a rulefile argument.", rp_file);
+
+        return -1;
+      }
+
+      if (hc_path_read (rp_file) == false)
+      {
+        event_log_error (hashcat_ctx, "%s: %s", rp_file, strerror (errno));
+
+        return -1;
+      }
+
+      if (hc_path_has_bom (rp_file) == true)
+      {
+        event_log_error (hashcat_ctx, "%s: Byte Order Mark (BOM) was detected", rp_file);
+
+        return -1;
+      }
+    }
+  }
 
   // logfile
 
@@ -2594,6 +2703,20 @@ int user_options_check_files (hashcat_ctx_t *hashcat_ctx)
       }
     }
   }
+  else if (user_options->attack_mode == ATTACK_MODE_ASSOCIATION)
+  {
+    for (int i = 0; i < user_options_extra->hc_workc; i++)
+    {
+      char *wlfile = user_options_extra->hc_workv[i];
+
+      if (hc_same_files (outfile_ctx->filename, wlfile) == true)
+      {
+        event_log_error (hashcat_ctx, "Outfile and wordlist cannot point to the same file.");
+
+        return -1;
+      }
+    }
+  }
 
   // pidfile
 
@@ -2702,7 +2825,13 @@ int user_options_check_files (hashcat_ctx_t *hashcat_ctx)
     return -1;
   }
 
+  const bool quiet_save = user_options->quiet;
+
+  user_options->quiet = true;
+
   const int rc = hashconfig_init (hashcat_ctx);
+
+  user_options->quiet = quiet_save;
 
   if (rc == -1) return -1;
 
@@ -2760,12 +2889,14 @@ int user_options_check_files (hashcat_ctx_t *hashcat_ctx)
    * default building options
    */
 
+  /* temporary disabled due to https://github.com/hashcat/hashcat/issues/2379
   if (chdir (folder_config->cpath_real) == -1)
   {
     event_log_error (hashcat_ctx, "%s: %s", folder_config->cpath_real, strerror (errno));
 
     return -1;
   }
+  */
 
   // include check
   // this test needs to be done manually because of macOS opencl runtime
@@ -2792,9 +2923,13 @@ int user_options_check_files (hashcat_ctx_t *hashcat_ctx)
 
   for (int i = 0; files_names[i] != NULL; i++)
   {
-    if (hc_path_read (files_names[i]) == false)
+    char *temp_filename = NULL;
+
+    hc_asprintf (&temp_filename, "%s/%s", folder_config->cpath_real, files_names[i]);
+
+    if (hc_path_read (temp_filename) == false)
     {
-      event_log_error (hashcat_ctx, "%s: %s", files_names[i], strerror (errno));
+      event_log_error (hashcat_ctx, "%s: %s", temp_filename, strerror (errno));
 
       return -1;
     }
@@ -2802,6 +2937,7 @@ int user_options_check_files (hashcat_ctx_t *hashcat_ctx)
 
   // return back to the folder we came from initially (workaround)
 
+  /* temporary disabled due to https://github.com/hashcat/hashcat/issues/2379
   #if defined (_WIN)
   if (chdir ("..") == -1)
   {
@@ -2817,6 +2953,7 @@ int user_options_check_files (hashcat_ctx_t *hashcat_ctx)
     return -1;
   }
   #endif
+  */
 
   return 0;
 }

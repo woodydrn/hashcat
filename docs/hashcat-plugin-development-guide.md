@@ -383,6 +383,8 @@ This configuration item is a bitmask field. There are a few switches which you c
 * OPTI_TYPE_SLOW_HASH_SIMD_INIT: This flag tells the hashcat host binary to divide the number of work items with the size of the vector being used. The *_init kernel needs to be written using vector data types. Vector data types have a strong impact on CPU performance, since they will be translated from the OpenCL JiT into SSE2/AVX/AVX2/XOP instructions. Modern GPUs use scalar data types thus there is no benefit from using vector data types. This is not recommended for *_init kernels because it makes the kernel much more complicated while at the same time the _init kernel is called only once per password guess.
 * OPTI_TYPE_SLOW_HASH_SIMD_LOOP: see OPTI_TYPE_SLOW_HASH_SIMD_INIT but for *_loop kernels. If it is possible for your *_loop kernel to be written in vector data types, this is highly recommended. You will typically find this option being used if the _loop kernel does not do any data-dependent branching.
 * OPTI_TYPE_SLOW_HASH_SIMD_COMP: see OPTI_TYPE_SLOW_HASH_SIMD_INIT but for *_comp kernels.
+* OPTI_TYPE_SLOW_HASH_SIMD_INIT2: see OPTI_TYPE_SLOW_HASH_SIMD_INIT but for *_init2 kernels.
+* OPTI_TYPE_SLOW_HASH_SIMD_LOOP2: see OPTI_TYPE_SLOW_HASH_SIMD_LOOP but for *_loop2 kernels.
 * OPTI_TYPE_USES_BITS_8: This flag is passed to the JiT and helps optimize some of the GPU library functions at compile time. The configuration defines the bitsize of the underlying crypto primitive.
 * OPTI_TYPE_USES_BITS_16: see OPTI_TYPE_USES_BITS_8
 * OPTI_TYPE_USES_BITS_32: see OPTI_TYPE_USES_BITS_8. This is the default in case no OPTI_TYPE_USES_BITS_* flag is being used. Almost all traditional crypto primitives use 32 bits: MD4, MD5, SHA1, SHA256, RipeMD160, etc.
@@ -505,6 +507,16 @@ The --example-hashes command line argument together with a specific hash mode (-
 
 This is the password to crack the hash given in module_st_hash() for the self-test functionality.
 
+### module_hook_extra_param_init() and module_hook_extra_param_term() ###
+
+These two functions were added to hashcat beginning with version 6.2.0 when it was required for a module to use a 3rd party library from inside a hook function. However, the module developer is free to decide how to use this buffer (it doesn't have to be a library handle). Generally, it is a buffer that the module developer would use for something that they need to initialize and terminate only once on startup and shutdown for performance reasons.
+
+It is unclear to hashcat if this buffer will be handled in a thread-safe fashion or not, but since hooks are multi-threaded, hashcat will allocate multiple buffers (as many as there are hook threads) of this type for the module developer. This enables the module developer to load 3rd party libraries where they have no control over and which are known to not be thread-safe.
+
+The module developer does not have to care about managing the multiple instances but has to provide the size of the buffer to be allocated. For this, they have to use the module_hook_extra_param_size() function. The buffer in *hook_extra_param is zeroed and ready to be written when module_hook_extra_param_init() is called. On startup, hashcat will call module_hook_extra_param_init() that many times as there are hook threads each time providing the module function with a new buffer. The same logic applies to module_hook_extra_param_term() on shutdown. Hashcat will also free the memory on shutdown.
+
+A good example for this is: `src/modules/module_xxxxx.c`
+
 ## Kernel ##
 
 This is the second necessary ingredient for creating a plugin. Particular attention should be paid to the development of the kernel. Compiling the kernel takes a relatively long time, so both hashcat and the various compute APIs try to save a binary kernel in a cached structure. This serves to reduce the startup time and it is important for the user experience (UX). This however can be a pain as a developer.
@@ -537,14 +549,22 @@ Additionally there is a couple of command line parameters that you want to use:
 Typically a developer command line for hashcat looks the following:
 
 ```
-$ rm -rf kernels $HOME/.nv; ./hashcat -m XXXXX hash.txt word.txt --potfile-disable --self-test-disable -n 1 -u 1 -T 1 --quiet --backend-vector-width 1 -d 1
+$ rm -rf kernels $HOME/.nv; ./hashcat -m XXXXX hash.txt word.txt --potfile-disable --self-test-disable -n 1 -u 1 -T 1 --quiet --backend-vector-width 1 -d 1 --force
 ```
 
-If you need to printf from without a _loop kernel, keep in mind that you need to add a branching manually for a specific loop position.
+When adding print statements keep in mind that you need to manually add a conditional to branch on a specific loop position, otherwise every parallel execution of the kernel will execute the printf(), flooding your terminal. So you can use either:
 
 ```
 if ((loop_pos + i) == 0) printf ("%08x\n", a);
 ```
+
+from a _loop kernel, or
+
+```
+if ((gid == 0) && (lid == 0)) printf ("%08x\n", a);
+```
+
+from a kernel without _loop.
 
 Some last recommendations about printf() itself. Printing a string %s is not recommended. Missing zero bytes or big endian byte order can be very confusing. Instead try to use only the %08x template for everything. Especially for strings this makes a lot of sense, if for example you want to find unexpected non zero bytes. This can be done by calling printf() multiple times. Get used to this and it will simplify a lot of things for you.
 

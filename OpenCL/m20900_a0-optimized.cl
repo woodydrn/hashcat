@@ -421,7 +421,7 @@ KERNEL_FQ void m20900_m04 (KERN_ATTR_RULES ())
 
     _w2[0] = 0;
     _w2[1] = 0;
-    _w2[2] = 0; 
+    _w2[2] = 0;
     _w2[3] = 0;
     _w3[0] = 0;
     _w3[1] = 0;
@@ -593,7 +593,7 @@ KERNEL_FQ void m20900_m04 (KERN_ATTR_RULES ())
     _w2[1] = uint_to_hex_lower8 ((e0 >>  8) & 255) <<  0
            | uint_to_hex_lower8 ((e0 >>  0) & 255) << 16;
 
-    _w2[2] = 0; 
+    _w2[2] = 0;
     _w2[3] = 0;
     _w3[0] = 0;
     _w3[1] = 0;
@@ -792,10 +792,10 @@ KERNEL_FQ void m20900_s04 (KERN_ATTR_RULES ())
 
   const u32 search[4] =
   {
-    digests_buf[digests_offset].digest_buf[DGST_R0],
-    digests_buf[digests_offset].digest_buf[DGST_R1],
-    digests_buf[digests_offset].digest_buf[DGST_R2],
-    digests_buf[digests_offset].digest_buf[DGST_R3]
+    digests_buf[DIGESTS_OFFSET].digest_buf[DGST_R0],
+    digests_buf[DIGESTS_OFFSET].digest_buf[DGST_R1],
+    digests_buf[DIGESTS_OFFSET].digest_buf[DGST_R2],
+    digests_buf[DIGESTS_OFFSET].digest_buf[DGST_R3]
   };
 
   /**
@@ -1143,7 +1143,7 @@ KERNEL_FQ void m20900_s04 (KERN_ATTR_RULES ())
 
     _w2[0] = 0;
     _w2[1] = 0;
-    _w2[2] = 0; 
+    _w2[2] = 0;
     _w2[3] = 0;
     _w3[0] = 0;
     _w3[1] = 0;
@@ -1315,7 +1315,7 @@ KERNEL_FQ void m20900_s04 (KERN_ATTR_RULES ())
     _w2[1] = uint_to_hex_lower8 ((e0 >>  8) & 255) <<  0
            | uint_to_hex_lower8 ((e0 >>  0) & 255) << 16;
 
-    _w2[2] = 0; 
+    _w2[2] = 0;
     _w2[3] = 0;
     _w3[0] = 0;
     _w3[1] = 0;

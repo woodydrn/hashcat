@@ -23,13 +23,13 @@
 #define PUTCHAR(a,p,c) ((u8 *)(a))[(p)] = (u8) (c)
 #endif
 
-#define SETSHIFTEDINT(a,n,v)        \
-{                                   \
-  const u32 s = ((n) & 3) * 8;     \
-  const u64 x = (u64) (v) << s; \
+#define SETSHIFTEDINT(a,n,v)                  \
+{                                             \
+  const u32 s = ((n) & 3) * 8;                \
+  const u64 x = (u64) (v) << s;               \
   (a)[((n)/4)+0] &= ~(0xff << ((n & 3) * 8)); \
-  (a)[((n)/4)+0] |= x;              \
-  (a)[((n)/4)+1]  = x >> 32;        \
+  (a)[((n)/4)+0] |= x;                        \
+  (a)[((n)/4)+1]  = x >> 32;                  \
 }
 
 CONSTANT_VK u32a sapb_trans_tbl[256] =
@@ -187,12 +187,12 @@ KERNEL_FQ void m07700_m04 (KERN_ATTR_BASIC ())
 
   u32 salt_buf0[4];
 
-  salt_buf0[0] = salt_bufs[salt_pos].salt_buf[0];
-  salt_buf0[1] = salt_bufs[salt_pos].salt_buf[1];
-  salt_buf0[2] = salt_bufs[salt_pos].salt_buf[2];
+  salt_buf0[0] = salt_bufs[SALT_POS].salt_buf[0];
+  salt_buf0[1] = salt_bufs[SALT_POS].salt_buf[1];
+  salt_buf0[2] = salt_bufs[SALT_POS].salt_buf[2];
   salt_buf0[3] = 0;
 
-  const u32 salt_len = salt_bufs[salt_pos].salt_len;
+  const u32 salt_len = salt_bufs[SALT_POS].salt_len;
 
   salt_buf0[0] = sapb_trans (salt_buf0[0]);
   salt_buf0[1] = sapb_trans (salt_buf0[1]);
@@ -394,12 +394,12 @@ KERNEL_FQ void m07700_s04 (KERN_ATTR_BASIC ())
 
   u32 salt_buf0[4];
 
-  salt_buf0[0] = salt_bufs[salt_pos].salt_buf[0];
-  salt_buf0[1] = salt_bufs[salt_pos].salt_buf[1];
-  salt_buf0[2] = salt_bufs[salt_pos].salt_buf[2];
+  salt_buf0[0] = salt_bufs[SALT_POS].salt_buf[0];
+  salt_buf0[1] = salt_bufs[SALT_POS].salt_buf[1];
+  salt_buf0[2] = salt_bufs[SALT_POS].salt_buf[2];
   salt_buf0[3] = 0;
 
-  const u32 salt_len = salt_bufs[salt_pos].salt_len;
+  const u32 salt_len = salt_bufs[SALT_POS].salt_len;
 
   salt_buf0[0] = sapb_trans (salt_buf0[0]);
   salt_buf0[1] = sapb_trans (salt_buf0[1]);
@@ -411,8 +411,8 @@ KERNEL_FQ void m07700_s04 (KERN_ATTR_BASIC ())
 
   const u32 search[4] =
   {
-    digests_buf[digests_offset].digest_buf[DGST_R0],
-    digests_buf[digests_offset].digest_buf[DGST_R1],
+    digests_buf[DIGESTS_OFFSET].digest_buf[DGST_R0],
+    digests_buf[DIGESTS_OFFSET].digest_buf[DGST_R1],
     0,
     0
   };

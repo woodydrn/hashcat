@@ -547,7 +547,7 @@ int module_hash_encode (MAYBE_UNUSED const hashconfig_t *hashconfig, MAYBE_UNUSE
 
   char *ptr_data = line_buf;
 
-  ptr_data += strlen(line_buf);
+  ptr_data += strlen (line_buf);
 
   *ptr_data = '*';
   ptr_data++;
@@ -594,7 +594,7 @@ int module_hash_encode (MAYBE_UNUSED const hashconfig_t *hashconfig, MAYBE_UNUSE
 
     sprintf (ptr_data, "%u", contents_len);
 
-    ptr_data += strlen(ptr_contents_len);
+    ptr_data += strlen (ptr_contents_len);
 
     *ptr_data = '*';
     ptr_data++;
@@ -616,6 +616,7 @@ int module_hash_encode (MAYBE_UNUSED const hashconfig_t *hashconfig, MAYBE_UNUSE
     for (u32 i = 0; i < contents_hash_len; i++, ptr_data += 8)
       sprintf (ptr_data, "%08x", ptr_contents_hash[i]);
   }
+
   if (keyfile_len)
   {
     *ptr_data = '*';
@@ -680,6 +681,9 @@ void module_init (module_ctx_t *module_ctx)
   module_ctx->module_hashes_count_min         = MODULE_DEFAULT;
   module_ctx->module_hashes_count_max         = MODULE_DEFAULT;
   module_ctx->module_hlfmt_disable            = MODULE_DEFAULT;
+  module_ctx->module_hook_extra_param_size    = MODULE_DEFAULT;
+  module_ctx->module_hook_extra_param_init    = MODULE_DEFAULT;
+  module_ctx->module_hook_extra_param_term    = MODULE_DEFAULT;
   module_ctx->module_hook12                   = MODULE_DEFAULT;
   module_ctx->module_hook23                   = MODULE_DEFAULT;
   module_ctx->module_hook_salt_size           = MODULE_DEFAULT;

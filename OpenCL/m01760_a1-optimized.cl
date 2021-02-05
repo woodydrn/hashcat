@@ -68,22 +68,22 @@ DECLSPEC void hmac_sha512_pad (u32x *w0, u32x *w1, u32x *w2, u32x *w3, u64x *ipa
   u64x w2_t[4];
   u64x w3_t[4];
 
-  w0_t[0] = hl32_to_64 (w0[0], w0[1]) ^ make_u64x (0x3636363636363636);
-  w0_t[1] = hl32_to_64 (w0[2], w0[3]) ^ make_u64x (0x3636363636363636);
-  w0_t[2] = hl32_to_64 (w1[0], w1[1]) ^ make_u64x (0x3636363636363636);
-  w0_t[3] = hl32_to_64 (w1[2], w1[3]) ^ make_u64x (0x3636363636363636);
-  w1_t[0] = hl32_to_64 (w2[0], w2[1]) ^ make_u64x (0x3636363636363636);
-  w1_t[1] = hl32_to_64 (w2[2], w2[3]) ^ make_u64x (0x3636363636363636);
-  w1_t[2] = hl32_to_64 (w3[0], w3[1]) ^ make_u64x (0x3636363636363636);
-  w1_t[3] = hl32_to_64 (w3[2], w3[3]) ^ make_u64x (0x3636363636363636);
-  w2_t[0] =                             make_u64x (0x3636363636363636);
-  w2_t[1] =                             make_u64x (0x3636363636363636);
-  w2_t[2] =                             make_u64x (0x3636363636363636);
-  w2_t[3] =                             make_u64x (0x3636363636363636);
-  w3_t[0] =                             make_u64x (0x3636363636363636);
-  w3_t[1] =                             make_u64x (0x3636363636363636);
-  w3_t[2] =                             make_u64x (0x3636363636363636);
-  w3_t[3] =                             make_u64x (0x3636363636363636);
+  w0_t[0] = hl32_to_64 (w0[0], w0[1]) ^ make_u64x (0x3636363636363636UL);
+  w0_t[1] = hl32_to_64 (w0[2], w0[3]) ^ make_u64x (0x3636363636363636UL);
+  w0_t[2] = hl32_to_64 (w1[0], w1[1]) ^ make_u64x (0x3636363636363636UL);
+  w0_t[3] = hl32_to_64 (w1[2], w1[3]) ^ make_u64x (0x3636363636363636UL);
+  w1_t[0] = hl32_to_64 (w2[0], w2[1]) ^ make_u64x (0x3636363636363636UL);
+  w1_t[1] = hl32_to_64 (w2[2], w2[3]) ^ make_u64x (0x3636363636363636UL);
+  w1_t[2] = hl32_to_64 (w3[0], w3[1]) ^ make_u64x (0x3636363636363636UL);
+  w1_t[3] = hl32_to_64 (w3[2], w3[3]) ^ make_u64x (0x3636363636363636UL);
+  w2_t[0] =                             make_u64x (0x3636363636363636UL);
+  w2_t[1] =                             make_u64x (0x3636363636363636UL);
+  w2_t[2] =                             make_u64x (0x3636363636363636UL);
+  w2_t[3] =                             make_u64x (0x3636363636363636UL);
+  w3_t[0] =                             make_u64x (0x3636363636363636UL);
+  w3_t[1] =                             make_u64x (0x3636363636363636UL);
+  w3_t[2] =                             make_u64x (0x3636363636363636UL);
+  w3_t[3] =                             make_u64x (0x3636363636363636UL);
 
   ipad[0] = SHA512M_A;
   ipad[1] = SHA512M_B;
@@ -96,22 +96,22 @@ DECLSPEC void hmac_sha512_pad (u32x *w0, u32x *w1, u32x *w2, u32x *w3, u64x *ipa
 
   sha512_transform_transport_vector (w0_t, w1_t, w2_t, w3_t, ipad);
 
-  w0_t[0] = hl32_to_64 (w0[0], w0[1]) ^ make_u64x (0x5c5c5c5c5c5c5c5c);
-  w0_t[1] = hl32_to_64 (w0[2], w0[3]) ^ make_u64x (0x5c5c5c5c5c5c5c5c);
-  w0_t[2] = hl32_to_64 (w1[0], w1[1]) ^ make_u64x (0x5c5c5c5c5c5c5c5c);
-  w0_t[3] = hl32_to_64 (w1[2], w1[3]) ^ make_u64x (0x5c5c5c5c5c5c5c5c);
-  w1_t[0] = hl32_to_64 (w2[0], w2[1]) ^ make_u64x (0x5c5c5c5c5c5c5c5c);
-  w1_t[1] = hl32_to_64 (w2[2], w2[3]) ^ make_u64x (0x5c5c5c5c5c5c5c5c);
-  w1_t[2] = hl32_to_64 (w3[0], w3[1]) ^ make_u64x (0x5c5c5c5c5c5c5c5c);
-  w1_t[3] = hl32_to_64 (w3[2], w3[3]) ^ make_u64x (0x5c5c5c5c5c5c5c5c);
-  w2_t[0] =                             make_u64x (0x5c5c5c5c5c5c5c5c);
-  w2_t[1] =                             make_u64x (0x5c5c5c5c5c5c5c5c);
-  w2_t[2] =                             make_u64x (0x5c5c5c5c5c5c5c5c);
-  w2_t[3] =                             make_u64x (0x5c5c5c5c5c5c5c5c);
-  w3_t[0] =                             make_u64x (0x5c5c5c5c5c5c5c5c);
-  w3_t[1] =                             make_u64x (0x5c5c5c5c5c5c5c5c);
-  w3_t[2] =                             make_u64x (0x5c5c5c5c5c5c5c5c);
-  w3_t[3] =                             make_u64x (0x5c5c5c5c5c5c5c5c);
+  w0_t[0] = hl32_to_64 (w0[0], w0[1]) ^ make_u64x (0x5c5c5c5c5c5c5c5cUL);
+  w0_t[1] = hl32_to_64 (w0[2], w0[3]) ^ make_u64x (0x5c5c5c5c5c5c5c5cUL);
+  w0_t[2] = hl32_to_64 (w1[0], w1[1]) ^ make_u64x (0x5c5c5c5c5c5c5c5cUL);
+  w0_t[3] = hl32_to_64 (w1[2], w1[3]) ^ make_u64x (0x5c5c5c5c5c5c5c5cUL);
+  w1_t[0] = hl32_to_64 (w2[0], w2[1]) ^ make_u64x (0x5c5c5c5c5c5c5c5cUL);
+  w1_t[1] = hl32_to_64 (w2[2], w2[3]) ^ make_u64x (0x5c5c5c5c5c5c5c5cUL);
+  w1_t[2] = hl32_to_64 (w3[0], w3[1]) ^ make_u64x (0x5c5c5c5c5c5c5c5cUL);
+  w1_t[3] = hl32_to_64 (w3[2], w3[3]) ^ make_u64x (0x5c5c5c5c5c5c5c5cUL);
+  w2_t[0] =                             make_u64x (0x5c5c5c5c5c5c5c5cUL);
+  w2_t[1] =                             make_u64x (0x5c5c5c5c5c5c5c5cUL);
+  w2_t[2] =                             make_u64x (0x5c5c5c5c5c5c5c5cUL);
+  w2_t[3] =                             make_u64x (0x5c5c5c5c5c5c5c5cUL);
+  w3_t[0] =                             make_u64x (0x5c5c5c5c5c5c5c5cUL);
+  w3_t[1] =                             make_u64x (0x5c5c5c5c5c5c5c5cUL);
+  w3_t[2] =                             make_u64x (0x5c5c5c5c5c5c5c5cUL);
+  w3_t[3] =                             make_u64x (0x5c5c5c5c5c5c5c5cUL);
 
   opad[0] = SHA512M_A;
   opad[1] = SHA512M_B;
@@ -168,7 +168,7 @@ DECLSPEC void hmac_sha512_run (u32x *w0, u32x *w1, u32x *w2, u32x *w3, u64x *ipa
   w1_t[1] = digest[5];
   w1_t[2] = digest[6];
   w1_t[3] = digest[7];
-  w2_t[0] = 0x8000000000000000;
+  w2_t[0] = 0x8000000000000000UL;
   w2_t[1] = 0;
   w2_t[2] = 0;
   w2_t[3] = 0;
@@ -228,22 +228,22 @@ KERNEL_FQ void m01760_m04 (KERN_ATTR_BASIC ())
   u32 salt_buf2[4];
   u32 salt_buf3[4];
 
-  salt_buf0[0] = hc_swap32_S (salt_bufs[salt_pos].salt_buf[ 0]);
-  salt_buf0[1] = hc_swap32_S (salt_bufs[salt_pos].salt_buf[ 1]);
-  salt_buf0[2] = hc_swap32_S (salt_bufs[salt_pos].salt_buf[ 2]);
-  salt_buf0[3] = hc_swap32_S (salt_bufs[salt_pos].salt_buf[ 3]);
-  salt_buf1[0] = hc_swap32_S (salt_bufs[salt_pos].salt_buf[ 4]);
-  salt_buf1[1] = hc_swap32_S (salt_bufs[salt_pos].salt_buf[ 5]);
-  salt_buf1[2] = hc_swap32_S (salt_bufs[salt_pos].salt_buf[ 6]);
-  salt_buf1[3] = hc_swap32_S (salt_bufs[salt_pos].salt_buf[ 7]);
-  salt_buf2[0] = hc_swap32_S (salt_bufs[salt_pos].salt_buf[ 8]);
-  salt_buf2[1] = hc_swap32_S (salt_bufs[salt_pos].salt_buf[ 9]);
-  salt_buf2[2] = hc_swap32_S (salt_bufs[salt_pos].salt_buf[10]);
-  salt_buf2[3] = hc_swap32_S (salt_bufs[salt_pos].salt_buf[11]);
-  salt_buf3[0] = hc_swap32_S (salt_bufs[salt_pos].salt_buf[12]);
-  salt_buf3[1] = hc_swap32_S (salt_bufs[salt_pos].salt_buf[13]);
-  salt_buf3[2] = hc_swap32_S (salt_bufs[salt_pos].salt_buf[14]);
-  salt_buf3[3] = hc_swap32_S (salt_bufs[salt_pos].salt_buf[15]);
+  salt_buf0[0] = hc_swap32_S (salt_bufs[SALT_POS].salt_buf[ 0]);
+  salt_buf0[1] = hc_swap32_S (salt_bufs[SALT_POS].salt_buf[ 1]);
+  salt_buf0[2] = hc_swap32_S (salt_bufs[SALT_POS].salt_buf[ 2]);
+  salt_buf0[3] = hc_swap32_S (salt_bufs[SALT_POS].salt_buf[ 3]);
+  salt_buf1[0] = hc_swap32_S (salt_bufs[SALT_POS].salt_buf[ 4]);
+  salt_buf1[1] = hc_swap32_S (salt_bufs[SALT_POS].salt_buf[ 5]);
+  salt_buf1[2] = hc_swap32_S (salt_bufs[SALT_POS].salt_buf[ 6]);
+  salt_buf1[3] = hc_swap32_S (salt_bufs[SALT_POS].salt_buf[ 7]);
+  salt_buf2[0] = hc_swap32_S (salt_bufs[SALT_POS].salt_buf[ 8]);
+  salt_buf2[1] = hc_swap32_S (salt_bufs[SALT_POS].salt_buf[ 9]);
+  salt_buf2[2] = hc_swap32_S (salt_bufs[SALT_POS].salt_buf[10]);
+  salt_buf2[3] = hc_swap32_S (salt_bufs[SALT_POS].salt_buf[11]);
+  salt_buf3[0] = hc_swap32_S (salt_bufs[SALT_POS].salt_buf[12]);
+  salt_buf3[1] = hc_swap32_S (salt_bufs[SALT_POS].salt_buf[13]);
+  salt_buf3[2] = hc_swap32_S (salt_bufs[SALT_POS].salt_buf[14]);
+  salt_buf3[3] = hc_swap32_S (salt_bufs[SALT_POS].salt_buf[15]);
 
   /**
    * pads
@@ -428,22 +428,22 @@ KERNEL_FQ void m01760_s04 (KERN_ATTR_BASIC ())
   u32 salt_buf2[4];
   u32 salt_buf3[4];
 
-  salt_buf0[0] = hc_swap32_S (salt_bufs[salt_pos].salt_buf[ 0]);
-  salt_buf0[1] = hc_swap32_S (salt_bufs[salt_pos].salt_buf[ 1]);
-  salt_buf0[2] = hc_swap32_S (salt_bufs[salt_pos].salt_buf[ 2]);
-  salt_buf0[3] = hc_swap32_S (salt_bufs[salt_pos].salt_buf[ 3]);
-  salt_buf1[0] = hc_swap32_S (salt_bufs[salt_pos].salt_buf[ 4]);
-  salt_buf1[1] = hc_swap32_S (salt_bufs[salt_pos].salt_buf[ 5]);
-  salt_buf1[2] = hc_swap32_S (salt_bufs[salt_pos].salt_buf[ 6]);
-  salt_buf1[3] = hc_swap32_S (salt_bufs[salt_pos].salt_buf[ 7]);
-  salt_buf2[0] = hc_swap32_S (salt_bufs[salt_pos].salt_buf[ 8]);
-  salt_buf2[1] = hc_swap32_S (salt_bufs[salt_pos].salt_buf[ 9]);
-  salt_buf2[2] = hc_swap32_S (salt_bufs[salt_pos].salt_buf[10]);
-  salt_buf2[3] = hc_swap32_S (salt_bufs[salt_pos].salt_buf[11]);
-  salt_buf3[0] = hc_swap32_S (salt_bufs[salt_pos].salt_buf[12]);
-  salt_buf3[1] = hc_swap32_S (salt_bufs[salt_pos].salt_buf[13]);
-  salt_buf3[2] = hc_swap32_S (salt_bufs[salt_pos].salt_buf[14]);
-  salt_buf3[3] = hc_swap32_S (salt_bufs[salt_pos].salt_buf[15]);
+  salt_buf0[0] = hc_swap32_S (salt_bufs[SALT_POS].salt_buf[ 0]);
+  salt_buf0[1] = hc_swap32_S (salt_bufs[SALT_POS].salt_buf[ 1]);
+  salt_buf0[2] = hc_swap32_S (salt_bufs[SALT_POS].salt_buf[ 2]);
+  salt_buf0[3] = hc_swap32_S (salt_bufs[SALT_POS].salt_buf[ 3]);
+  salt_buf1[0] = hc_swap32_S (salt_bufs[SALT_POS].salt_buf[ 4]);
+  salt_buf1[1] = hc_swap32_S (salt_bufs[SALT_POS].salt_buf[ 5]);
+  salt_buf1[2] = hc_swap32_S (salt_bufs[SALT_POS].salt_buf[ 6]);
+  salt_buf1[3] = hc_swap32_S (salt_bufs[SALT_POS].salt_buf[ 7]);
+  salt_buf2[0] = hc_swap32_S (salt_bufs[SALT_POS].salt_buf[ 8]);
+  salt_buf2[1] = hc_swap32_S (salt_bufs[SALT_POS].salt_buf[ 9]);
+  salt_buf2[2] = hc_swap32_S (salt_bufs[SALT_POS].salt_buf[10]);
+  salt_buf2[3] = hc_swap32_S (salt_bufs[SALT_POS].salt_buf[11]);
+  salt_buf3[0] = hc_swap32_S (salt_bufs[SALT_POS].salt_buf[12]);
+  salt_buf3[1] = hc_swap32_S (salt_bufs[SALT_POS].salt_buf[13]);
+  salt_buf3[2] = hc_swap32_S (salt_bufs[SALT_POS].salt_buf[14]);
+  salt_buf3[3] = hc_swap32_S (salt_bufs[SALT_POS].salt_buf[15]);
 
   /**
    * pads
@@ -482,10 +482,10 @@ KERNEL_FQ void m01760_s04 (KERN_ATTR_BASIC ())
 
   const u32 search[4] =
   {
-    digests_buf[digests_offset].digest_buf[DGST_R0],
-    digests_buf[digests_offset].digest_buf[DGST_R1],
-    digests_buf[digests_offset].digest_buf[DGST_R2],
-    digests_buf[digests_offset].digest_buf[DGST_R3]
+    digests_buf[DIGESTS_OFFSET].digest_buf[DGST_R0],
+    digests_buf[DIGESTS_OFFSET].digest_buf[DGST_R1],
+    digests_buf[DIGESTS_OFFSET].digest_buf[DGST_R2],
+    digests_buf[DIGESTS_OFFSET].digest_buf[DGST_R3]
   };
 
   /**

@@ -33,25 +33,25 @@ KERNEL_FQ void m08300_mxx (KERN_ATTR_RULES ())
 
   COPY_PW (pws[gid]);
 
-  const u32 salt_len = salt_bufs[salt_pos].salt_len;
+  const u32 salt_len = salt_bufs[SALT_POS].salt_len;
 
   u32 s[64] = { 0 };
 
   for (u32 i = 0, idx = 0; i < salt_len; i += 4, idx += 1)
   {
-    s[idx] = hc_swap32_S (salt_bufs[salt_pos].salt_buf[idx]);
+    s[idx] = hc_swap32_S (salt_bufs[SALT_POS].salt_buf[idx]);
   }
 
-  const u32 salt_len_pc = salt_bufs[salt_pos].salt_len_pc;
+  const u32 salt_len_pc = salt_bufs[SALT_POS].salt_len_pc;
 
   u32 s_pc[64] = { 0 };
 
   for (int i = 0, idx = 0; i < salt_len_pc; i += 4, idx += 1)
   {
-    s_pc[idx] = hc_swap32_S (salt_bufs[salt_pos].salt_buf_pc[idx]);
+    s_pc[idx] = hc_swap32_S (salt_bufs[SALT_POS].salt_buf_pc[idx]);
   }
 
-  const u32 salt_iter = salt_bufs[salt_pos].salt_iter;
+  const u32 salt_iter = salt_bufs[SALT_POS].salt_iter;
 
   /**
    * loop
@@ -67,11 +67,36 @@ KERNEL_FQ void m08300_mxx (KERN_ATTR_RULES ())
 
     sha1_init (&ctx1);
 
-    ctx1.w0[0] = (tmp.pw_len & 0xff) << 24;
+    // replace "." with the length:
 
-    ctx1.len = 1;
+    if (tmp.pw_len > 0)
+    {
+      u32 len = 0;
 
-    sha1_update_swap (&ctx1, tmp.i, tmp.pw_len);
+      for (int pos = tmp.pw_len - 1; pos >= 0; pos--)
+      {
+        const u32 div = pos  / 4;
+        const u32 mod = pos  & 3;
+        const u32 sht = mod << 3;
+
+        if (((tmp.i[div] >> sht) & 0xff) == 0x2e) // '.'
+        {
+          tmp.i[div] += (len - 0x2e) << sht;
+
+          len = 0;
+
+          continue;
+        }
+
+        len++;
+      }
+
+      ctx1.w0[0] = (len & 0xff) << 24;
+
+      ctx1.len = 1;
+
+      sha1_update_swap (&ctx1, tmp.i, tmp.pw_len);
+    }
 
     sha1_update (&ctx1, s_pc, salt_len_pc + 1);
 
@@ -140,10 +165,10 @@ KERNEL_FQ void m08300_sxx (KERN_ATTR_RULES ())
 
   const u32 search[4] =
   {
-    digests_buf[digests_offset].digest_buf[DGST_R0],
-    digests_buf[digests_offset].digest_buf[DGST_R1],
-    digests_buf[digests_offset].digest_buf[DGST_R2],
-    digests_buf[digests_offset].digest_buf[DGST_R3]
+    digests_buf[DIGESTS_OFFSET].digest_buf[DGST_R0],
+    digests_buf[DIGESTS_OFFSET].digest_buf[DGST_R1],
+    digests_buf[DIGESTS_OFFSET].digest_buf[DGST_R2],
+    digests_buf[DIGESTS_OFFSET].digest_buf[DGST_R3]
   };
 
   /**
@@ -152,25 +177,25 @@ KERNEL_FQ void m08300_sxx (KERN_ATTR_RULES ())
 
   COPY_PW (pws[gid]);
 
-  const u32 salt_len = salt_bufs[salt_pos].salt_len;
+  const u32 salt_len = salt_bufs[SALT_POS].salt_len;
 
   u32 s[64] = { 0 };
 
   for (u32 i = 0, idx = 0; i < salt_len; i += 4, idx += 1)
   {
-    s[idx] = hc_swap32_S (salt_bufs[salt_pos].salt_buf[idx]);
+    s[idx] = hc_swap32_S (salt_bufs[SALT_POS].salt_buf[idx]);
   }
 
-  const u32 salt_len_pc = salt_bufs[salt_pos].salt_len_pc;
+  const u32 salt_len_pc = salt_bufs[SALT_POS].salt_len_pc;
 
   u32 s_pc[64] = { 0 };
 
   for (int i = 0, idx = 0; i < salt_len_pc; i += 4, idx += 1)
   {
-    s_pc[idx] = hc_swap32_S (salt_bufs[salt_pos].salt_buf_pc[idx]);
+    s_pc[idx] = hc_swap32_S (salt_bufs[SALT_POS].salt_buf_pc[idx]);
   }
 
-  const u32 salt_iter = salt_bufs[salt_pos].salt_iter;
+  const u32 salt_iter = salt_bufs[SALT_POS].salt_iter;
 
   /**
    * loop
@@ -186,11 +211,36 @@ KERNEL_FQ void m08300_sxx (KERN_ATTR_RULES ())
 
     sha1_init (&ctx1);
 
-    ctx1.w0[0] = (tmp.pw_len & 0xff) << 24;
+    // replace "." with the length:
 
-    ctx1.len = 1;
+    if (tmp.pw_len > 0)
+    {
+      u32 len = 0;
 
-    sha1_update_swap (&ctx1, tmp.i, tmp.pw_len);
+      for (int pos = tmp.pw_len - 1; pos >= 0; pos--)
+      {
+        const u32 div = pos  / 4;
+        const u32 mod = pos  & 3;
+        const u32 sht = mod << 3;
+
+        if (((tmp.i[div] >> sht) & 0xff) == 0x2e) // '.'
+        {
+          tmp.i[div] += (len - 0x2e) << sht;
+
+          len = 0;
+
+          continue;
+        }
+
+        len++;
+      }
+
+      ctx1.w0[0] = (len & 0xff) << 24;
+
+      ctx1.len = 1;
+
+      sha1_update_swap (&ctx1, tmp.i, tmp.pw_len);
+    }
 
     sha1_update (&ctx1, s_pc, salt_len_pc + 1);
 

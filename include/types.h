@@ -239,6 +239,7 @@ typedef enum attack_mode
   ATTACK_MODE_TABLE     = 5,
   ATTACK_MODE_HYBRID1   = 6,
   ATTACK_MODE_HYBRID2   = 7,
+  ATTACK_MODE_ASSOCIATION   = 9,
   ATTACK_MODE_NONE      = 100
 
 } attack_mode_t;
@@ -354,27 +355,29 @@ typedef enum salt_type
 
 typedef enum opti_type
 {
-  OPTI_TYPE_OPTIMIZED_KERNEL    = (1 <<  0),
-  OPTI_TYPE_ZERO_BYTE           = (1 <<  1),
-  OPTI_TYPE_PRECOMPUTE_INIT     = (1 <<  2),
-  OPTI_TYPE_MEET_IN_MIDDLE      = (1 <<  3),
-  OPTI_TYPE_EARLY_SKIP          = (1 <<  4),
-  OPTI_TYPE_NOT_SALTED          = (1 <<  5),
-  OPTI_TYPE_NOT_ITERATED        = (1 <<  6),
-  OPTI_TYPE_PREPENDED_SALT      = (1 <<  7),
-  OPTI_TYPE_APPENDED_SALT       = (1 <<  8),
-  OPTI_TYPE_SINGLE_HASH         = (1 <<  9),
-  OPTI_TYPE_SINGLE_SALT         = (1 << 10),
-  OPTI_TYPE_BRUTE_FORCE         = (1 << 11),
-  OPTI_TYPE_RAW_HASH            = (1 << 12),
-  OPTI_TYPE_SLOW_HASH_SIMD_INIT = (1 << 13),
-  OPTI_TYPE_SLOW_HASH_SIMD_LOOP = (1 << 14),
-  OPTI_TYPE_SLOW_HASH_SIMD_COMP = (1 << 15),
-  OPTI_TYPE_USES_BITS_8         = (1 << 16),
-  OPTI_TYPE_USES_BITS_16        = (1 << 17),
-  OPTI_TYPE_USES_BITS_32        = (1 << 18),
-  OPTI_TYPE_USES_BITS_64        = (1 << 19),
-  OPTI_TYPE_REGISTER_LIMIT      = (1 << 20), // We'll limit the register count to 128
+  OPTI_TYPE_OPTIMIZED_KERNEL      = (1 <<  0),
+  OPTI_TYPE_ZERO_BYTE             = (1 <<  1),
+  OPTI_TYPE_PRECOMPUTE_INIT       = (1 <<  2),
+  OPTI_TYPE_MEET_IN_MIDDLE        = (1 <<  3),
+  OPTI_TYPE_EARLY_SKIP            = (1 <<  4),
+  OPTI_TYPE_NOT_SALTED            = (1 <<  5),
+  OPTI_TYPE_NOT_ITERATED          = (1 <<  6),
+  OPTI_TYPE_PREPENDED_SALT        = (1 <<  7),
+  OPTI_TYPE_APPENDED_SALT         = (1 <<  8),
+  OPTI_TYPE_SINGLE_HASH           = (1 <<  9),
+  OPTI_TYPE_SINGLE_SALT           = (1 << 10),
+  OPTI_TYPE_BRUTE_FORCE           = (1 << 11),
+  OPTI_TYPE_RAW_HASH              = (1 << 12),
+  OPTI_TYPE_SLOW_HASH_SIMD_INIT   = (1 << 13),
+  OPTI_TYPE_SLOW_HASH_SIMD_LOOP   = (1 << 14),
+  OPTI_TYPE_SLOW_HASH_SIMD_COMP   = (1 << 15),
+  OPTI_TYPE_USES_BITS_8           = (1 << 16),
+  OPTI_TYPE_USES_BITS_16          = (1 << 17),
+  OPTI_TYPE_USES_BITS_32          = (1 << 18),
+  OPTI_TYPE_USES_BITS_64          = (1 << 19),
+  OPTI_TYPE_REGISTER_LIMIT        = (1 << 20), // We'll limit the register count to 128
+  OPTI_TYPE_SLOW_HASH_SIMD_INIT2  = (1 << 21),
+  OPTI_TYPE_SLOW_HASH_SIMD_LOOP2  = (1 << 22),
 
 } opti_type_t;
 
@@ -945,6 +948,7 @@ struct hashconfig
   // sizes have to be size_t
 
   u64   esalt_size;
+  u64   hook_extra_param_size;
   u64   hook_salt_size;
   u64   tmp_size;
   u64   extra_tmp_size;
@@ -1056,6 +1060,7 @@ typedef struct hc_device_param
   int     device_id_alias_cnt;
   int     device_id_alias_buf[DEVICES_MAX];
 
+  u8      pcie_domain;
   u8      pcie_bus;
   u8      pcie_device;
   u8      pcie_function;
@@ -1437,6 +1442,7 @@ typedef struct hc_device_param
 
   cl_device_type    opencl_device_type;
   cl_uint           opencl_device_vendor_id;
+  u32               opencl_platform_id;
   cl_uint           opencl_platform_vendor_id;
 
   cl_device_id      opencl_device;
@@ -1551,6 +1557,9 @@ typedef struct backend_ctx
   int                 force_jit_compilation;
 
   // cuda
+
+  int                 rc_cuda_init;
+  int                 rc_nvrtc_init;
 
   int                 nvrtc_driver_version;
   int                 cuda_driver_version;
@@ -2436,6 +2445,8 @@ typedef struct module_ctx
 
   MODULE_INIT module_init;
 
+  void      **hook_extra_params; // free for module to use (for instance: library handles)
+
   u32         (*module_attack_exec)             (const hashconfig_t *, const user_options_t *, const user_options_extra_t *);
   void       *(*module_benchmark_esalt)         (const hashconfig_t *, const user_options_t *, const user_options_extra_t *);
   void       *(*module_benchmark_hook_salt)     (const hashconfig_t *, const user_options_t *, const user_options_extra_t *);
@@ -2501,8 +2512,12 @@ typedef struct module_ctx
   u32         (*module_deep_comp_kernel)        (const hashes_t *, const u32, const u32);
   int         (*module_hash_init_selftest)      (const hashconfig_t *, hash_t *);
 
-  void        (*module_hook12)                  (hc_device_param_t *, const void *, const u32, const u64);
-  void        (*module_hook23)                  (hc_device_param_t *, const void *, const u32, const u64);
+  u64         (*module_hook_extra_param_size)   (const hashconfig_t *, const user_options_t *, const user_options_extra_t *);
+  bool        (*module_hook_extra_param_init)   (const hashconfig_t *, const user_options_t *, const user_options_extra_t *, const folder_config_t *, const backend_ctx_t *, void *);
+  bool        (*module_hook_extra_param_term)   (const hashconfig_t *, const user_options_t *, const user_options_extra_t *, const folder_config_t *, const backend_ctx_t *, void *);
+
+  void        (*module_hook12)                  (hc_device_param_t *, const void *, const void *, const u32, const u64);
+  void        (*module_hook23)                  (hc_device_param_t *, const void *, const void *, const u32, const u64);
 
   int         (*module_build_plain_postprocess) (const hashconfig_t *, const hashes_t *, const void *, const u32 *, const size_t, const int, u32 *, const size_t);
 
@@ -2565,6 +2580,7 @@ typedef struct hook_thread_param
 
   hc_device_param_t *device_param;
 
+  void *hook_extra_param;
   void *hook_salts_buf;
 
   u32 salt_pos;
@@ -2625,6 +2641,7 @@ typedef enum hash_category
   HASH_CATEGORY_OTP                     = 17,
   HASH_CATEGORY_PLAIN                   = 18,
   HASH_CATEGORY_FRAMEWORK               = 19,
+  HASH_CATEGORY_PRIVATE_KEY             = 20,
 
 } hash_category_t;
 

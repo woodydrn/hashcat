@@ -27,16 +27,16 @@ typedef struct chacha20
 #define CHACHA_CONST_02 0x79622d32
 #define CHACHA_CONST_03 0x6b206574
 
-#define QR(a, b, c, d)                \
-  do {                                \
-    x[a] = x[a] + x[b];               \
-    x[d] = hc_rotl32(x[d] ^ x[a], 16);   \
-    x[c] = x[c] + x[d];               \
-    x[b] = hc_rotl32(x[b] ^ x[c], 12);   \
-    x[a] = x[a] + x[b];               \
-    x[d] = hc_rotl32(x[d] ^ x[a], 8);    \
-    x[c] = x[c] + x[d];               \
-    x[b] = hc_rotl32(x[b] ^ x[c], 7);    \
+#define QR(a, b, c, d)                  \
+  do {                                  \
+    x[a] = x[a] + x[b];                 \
+    x[d] = hc_rotl32 (x[d] ^ x[a], 16); \
+    x[c] = x[c] + x[d];                 \
+    x[b] = hc_rotl32 (x[b] ^ x[c], 12); \
+    x[a] = x[a] + x[b];                 \
+    x[d] = hc_rotl32 (x[d] ^ x[a], 8);  \
+    x[c] = x[c] + x[d];                 \
+    x[b] = hc_rotl32 (x[b] ^ x[c], 7);  \
   } while (0);
 
 DECLSPEC void chacha20_transform (const u32x *w0, const u32x *w1, const u32 *position, const u32 offset, const u32 *iv, const u32 *plain, u32x *digest)
@@ -91,16 +91,16 @@ DECLSPEC void chacha20_transform (const u32x *w0, const u32x *w1, const u32 *pos
   for (u8 i = 0; i < 10; i++)
   {
     /* Column round */
-    QR(0, 4, 8,  12);
-    QR(1, 5, 9,  13);
-    QR(2, 6, 10, 14);
-    QR(3, 7, 11, 15);
+    QR (0, 4, 8,  12);
+    QR (1, 5, 9,  13);
+    QR (2, 6, 10, 14);
+    QR (3, 7, 11, 15);
 
     /* Diagonal round */
-    QR(0, 5, 10, 15);
-    QR(1, 6, 11, 12);
-    QR(2, 7, 8,  13);
-    QR(3, 4, 9,  14);
+    QR (0, 5, 10, 15);
+    QR (1, 6, 11, 12);
+    QR (2, 7, 8,  13);
+    QR (3, 4, 9,  14);
   }
 
   x[ 0] += ctx[ 0];
@@ -181,16 +181,16 @@ DECLSPEC void chacha20_transform (const u32x *w0, const u32x *w1, const u32 *pos
     for (u8 i = 0; i < 10; i++)
     {
       /* Column round */
-      QR(16, 20, 24, 28);
-      QR(17, 21, 25, 29);
-      QR(18, 22, 26, 30);
-      QR(19, 23, 27, 31);
+      QR (16, 20, 24, 28);
+      QR (17, 21, 25, 29);
+      QR (18, 22, 26, 30);
+      QR (19, 23, 27, 31);
 
       /* Diagonal round */
-      QR(16, 21, 26, 31);
-      QR(17, 22, 27, 28);
-      QR(18, 23, 24, 29);
-      QR(19, 20, 25, 30);
+      QR (16, 21, 26, 31);
+      QR (17, 22, 27, 28);
+      QR (18, 23, 24, 29);
+      QR (19, 20, 25, 30);
     }
 
     x[16] += ctx[ 0];
@@ -273,20 +273,20 @@ KERNEL_FQ void m15400_m16 (KERN_ATTR_VECTOR_ESALT (chacha20_t))
 
   u32 iv[2];
 
-  iv[0] = esalt_bufs[digests_offset].iv[0];
-  iv[1] = esalt_bufs[digests_offset].iv[1];
+  iv[0] = esalt_bufs[DIGESTS_OFFSET].iv[0];
+  iv[1] = esalt_bufs[DIGESTS_OFFSET].iv[1];
 
   u32 plain[2];
 
-  plain[0] = esalt_bufs[digests_offset].plain[0];
-  plain[1] = esalt_bufs[digests_offset].plain[1];
+  plain[0] = esalt_bufs[DIGESTS_OFFSET].plain[0];
+  plain[1] = esalt_bufs[DIGESTS_OFFSET].plain[1];
 
   u32 position[2];
 
-  position[0] = esalt_bufs[digests_offset].position[0];
-  position[1] = esalt_bufs[digests_offset].position[1];
+  position[0] = esalt_bufs[DIGESTS_OFFSET].position[0];
+  position[1] = esalt_bufs[DIGESTS_OFFSET].position[1];
 
-  u32 offset = esalt_bufs[digests_offset].offset;
+  u32 offset = esalt_bufs[DIGESTS_OFFSET].offset;
 
   /**
    * loop
@@ -320,7 +320,7 @@ KERNEL_FQ void m15400_m16 (KERN_ATTR_VECTOR_ESALT (chacha20_t))
     const u32x r2 = digest[2];
     const u32x r3 = digest[3];
 
-    COMPARE_M_SIMD(r0, r1, r2, r3);
+    COMPARE_M_SIMD (r0, r1, r2, r3);
   }
 }
 
@@ -361,20 +361,20 @@ KERNEL_FQ void m15400_s16 (KERN_ATTR_VECTOR_ESALT (chacha20_t))
 
   u32 iv[2];
 
-  iv[0] = esalt_bufs[digests_offset].iv[0];
-  iv[1] = esalt_bufs[digests_offset].iv[1];
+  iv[0] = esalt_bufs[DIGESTS_OFFSET].iv[0];
+  iv[1] = esalt_bufs[DIGESTS_OFFSET].iv[1];
 
   u32 plain[2];
 
-  plain[0] = esalt_bufs[digests_offset].plain[0];
-  plain[1] = esalt_bufs[digests_offset].plain[1];
+  plain[0] = esalt_bufs[DIGESTS_OFFSET].plain[0];
+  plain[1] = esalt_bufs[DIGESTS_OFFSET].plain[1];
 
   u32 position[2];
 
-  position[0] = esalt_bufs[digests_offset].position[0];
-  position[1] = esalt_bufs[digests_offset].position[1];
+  position[0] = esalt_bufs[DIGESTS_OFFSET].position[0];
+  position[1] = esalt_bufs[DIGESTS_OFFSET].position[1];
 
-  u32 offset = esalt_bufs[digests_offset].offset;
+  u32 offset = esalt_bufs[DIGESTS_OFFSET].offset;
 
   /**
    * digest
@@ -382,10 +382,10 @@ KERNEL_FQ void m15400_s16 (KERN_ATTR_VECTOR_ESALT (chacha20_t))
 
   const u32 search[4] =
   {
-    digests_buf[digests_offset].digest_buf[DGST_R0],
-    digests_buf[digests_offset].digest_buf[DGST_R1],
-    digests_buf[digests_offset].digest_buf[DGST_R2],
-    digests_buf[digests_offset].digest_buf[DGST_R3]
+    digests_buf[DIGESTS_OFFSET].digest_buf[DGST_R0],
+    digests_buf[DIGESTS_OFFSET].digest_buf[DGST_R1],
+    digests_buf[DIGESTS_OFFSET].digest_buf[DGST_R2],
+    digests_buf[DIGESTS_OFFSET].digest_buf[DGST_R3]
   };
 
   /**
@@ -420,6 +420,6 @@ KERNEL_FQ void m15400_s16 (KERN_ATTR_VECTOR_ESALT (chacha20_t))
     const u32x r2 = digest[2];
     const u32x r3 = digest[3];
 
-    COMPARE_S_SIMD(r0, r1, r2, r3);
+    COMPARE_S_SIMD (r0, r1, r2, r3);
   }
 }

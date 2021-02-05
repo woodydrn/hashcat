@@ -22,12 +22,12 @@ import sys
 from pygost import gost34112012256
 key    = b"$salt"
 msg    = b"$word"
-digest = hmac.new(key, msg, gost34112012256).digest()
-sys.stdout.write(binascii.hexlify(digest[::-1]))
+digest = hmac.new (key, msg, gost34112012256).digest ()
+print (binascii.hexlify (digest[::-1]).decode (), end = "")
 
 END_CODE
 
-  my $digest = `python2 -c '$python_code'`;
+  my $digest = `python3 -c '$python_code'`;
 
   my $hash = sprintf ("%s:%s", $digest, $salt);
 

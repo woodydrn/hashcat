@@ -19,12 +19,12 @@ sub module_generate_hash
 import binascii
 import sys
 from pygost import gost34112012512
-digest = gost34112012512.new(b"$word").digest()
-sys.stdout.write(binascii.hexlify(digest[::-1]))
+digest = gost34112012512.new (b"$word").digest ()
+print (binascii.hexlify (digest[::-1]).decode (), end = "")
 
 END_CODE
 
-  my $hash = `python2 -c '$python_code'`;
+  my $hash = `python3 -c '$python_code'`;
 
   return $hash;
 }

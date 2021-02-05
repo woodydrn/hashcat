@@ -18,11 +18,13 @@ cpan install Authen::Passphrase::LANManager \
              Convert::EBCDIC                \
              Crypt::CBC                     \
              Crypt::DES                     \
+             Crypt::DES_EDE3                \
              Crypt::Digest::RIPEMD160       \
              Crypt::Digest::Whirlpool       \
              Crypt::ECB                     \
              Crypt::Eksblowfish::Bcrypt     \
              Crypt::GCrypt                  \
+             Crypt::Mode::CBC               \
              Crypt::Mode::ECB               \
              Crypt::MySQL                   \
              Crypt::OpenSSH::ChachaPoly     \
@@ -50,21 +52,36 @@ cpan install Authen::Passphrase::LANManager \
              Digest::SHA1                   \
              Digest::SHA3                   \
              Digest::SipHash                \
+             Encode                         \
              JSON                           \
              MIME::Base32                   \
              MIME::Base64                   \
              Net::DNS::RR::NSEC3            \
              Net::DNS::SEC                  \
+             POSIX                          \
              Text::Iconv                    \
              ;
 
 ERRORS=$((ERRORS+$?))
 
-pip2 install pygost pycryptoplus
+pip3 install pygost
 
-pip2 uninstall -y pycryptodome
+# pip3 uninstall -y pycryptoplus pycrypto pycryptodome
+
+pip3 install pycryptoplus
+pip3 uninstall -y pycryptodome
+pip3 install pycrypto
 
 ERRORS=$((ERRORS+$?))
+
+php --version > /dev/null 2> /dev/null
+
+if [ "$?" -ne 0 ]
+then
+  echo '[ ERROR ] php must be installed for some unit tests'
+
+  ERRORS=$((ERRORS+1))
+fi
 
 echo
 if [ $ERRORS -eq 0 ]; then

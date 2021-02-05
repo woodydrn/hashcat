@@ -14,6 +14,42 @@
 #include "inc_hash_sha1.cl"
 #endif
 
+DECLSPEC const u32 replace_dot_by_len (pw_t *out, GLOBAL_AS const pw_t *in, const u32 old_len)
+{
+  // first make out a copy of in:
+
+  out->pw_len = in->pw_len;
+
+  for (int i = 0; i < 64; i++)
+  {
+    out->i[i] = in->i[i];
+  }
+
+  // replace "." with the length:
+
+  u32 cur_len = old_len;
+
+  for (int pos = out->pw_len - 1; pos >= 0; pos--)
+  {
+    const u32 div = pos  / 4;
+    const u32 mod = pos  & 3;
+    const u32 sht = mod << 3;
+
+    if (((out->i[div] >> sht) & 0xff) == 0x2e) // '.'
+    {
+      out->i[div] += (cur_len - 0x2e) << sht;
+
+      cur_len = 0;
+
+      continue;
+    }
+
+    cur_len++;
+  }
+
+  return cur_len;
+}
+
 KERNEL_FQ void m08300_mxx (KERN_ATTR_BASIC ())
 {
   /**
@@ -29,25 +65,25 @@ KERNEL_FQ void m08300_mxx (KERN_ATTR_BASIC ())
    * base
    */
 
-  const u32 salt_len = salt_bufs[salt_pos].salt_len;
+  const u32 salt_len = salt_bufs[SALT_POS].salt_len;
 
   u32 s[64] = { 0 };
 
   for (u32 i = 0, idx = 0; i < salt_len; i += 4, idx += 1)
   {
-    s[idx] = hc_swap32_S (salt_bufs[salt_pos].salt_buf[idx]);
+    s[idx] = hc_swap32_S (salt_bufs[SALT_POS].salt_buf[idx]);
   }
 
-  const u32 salt_len_pc = salt_bufs[salt_pos].salt_len_pc;
+  const u32 salt_len_pc = salt_bufs[SALT_POS].salt_len_pc;
 
   u32 s_pc[64] = { 0 };
 
   for (int i = 0, idx = 0; i < salt_len_pc; i += 4, idx += 1)
   {
-    s_pc[idx] = hc_swap32_S (salt_bufs[salt_pos].salt_buf_pc[idx]);
+    s_pc[idx] = hc_swap32_S (salt_bufs[SALT_POS].salt_buf_pc[idx]);
   }
 
-  const u32 salt_iter = salt_bufs[salt_pos].salt_iter;
+  const u32 salt_iter = salt_bufs[SALT_POS].salt_iter;
 
   /**
    * loop
@@ -59,13 +95,27 @@ KERNEL_FQ void m08300_mxx (KERN_ATTR_BASIC ())
 
     sha1_init (&ctx1);
 
-    ctx1.w0[0] = ((pws[gid].pw_len + combs_buf[il_pos].pw_len) & 0xff) << 24;
+    const u32 pw_len = pws[gid].pw_len + combs_buf[il_pos].pw_len;
 
-    ctx1.len = 1;
+    // replace "." with the length:
 
-    sha1_update_global_swap (&ctx1, pws[gid].i, pws[gid].pw_len);
+    if (pw_len > 0)
+    {
+      pw_t combs;
 
-    sha1_update_global_swap (&ctx1, combs_buf[il_pos].i, combs_buf[il_pos].pw_len);
+      const u32 first_len_combs = replace_dot_by_len (&combs, &combs_buf[il_pos], 0);
+
+      pw_t pw;
+
+      const u32 first_len_pw = replace_dot_by_len (&pw, &pws[gid], first_len_combs);
+
+      ctx1.w0[0] = (first_len_pw & 0xff) << 24;
+
+      ctx1.len = 1;
+
+      sha1_update_swap (&ctx1, pw.i,    pw.pw_len);
+      sha1_update_swap (&ctx1, combs.i, combs.pw_len);
+    }
 
     sha1_update (&ctx1, s_pc, salt_len_pc + 1);
 
@@ -134,35 +184,35 @@ KERNEL_FQ void m08300_sxx (KERN_ATTR_BASIC ())
 
   const u32 search[4] =
   {
-    digests_buf[digests_offset].digest_buf[DGST_R0],
-    digests_buf[digests_offset].digest_buf[DGST_R1],
-    digests_buf[digests_offset].digest_buf[DGST_R2],
-    digests_buf[digests_offset].digest_buf[DGST_R3]
+    digests_buf[DIGESTS_OFFSET].digest_buf[DGST_R0],
+    digests_buf[DIGESTS_OFFSET].digest_buf[DGST_R1],
+    digests_buf[DIGESTS_OFFSET].digest_buf[DGST_R2],
+    digests_buf[DIGESTS_OFFSET].digest_buf[DGST_R3]
   };
 
   /**
    * base
    */
 
-  const u32 salt_len = salt_bufs[salt_pos].salt_len;
+  const u32 salt_len = salt_bufs[SALT_POS].salt_len;
 
   u32 s[64] = { 0 };
 
   for (u32 i = 0, idx = 0; i < salt_len; i += 4, idx += 1)
   {
-    s[idx] = hc_swap32_S (salt_bufs[salt_pos].salt_buf[idx]);
+    s[idx] = hc_swap32_S (salt_bufs[SALT_POS].salt_buf[idx]);
   }
 
-  const u32 salt_len_pc = salt_bufs[salt_pos].salt_len_pc;
+  const u32 salt_len_pc = salt_bufs[SALT_POS].salt_len_pc;
 
   u32 s_pc[64] = { 0 };
 
   for (int i = 0, idx = 0; i < salt_len_pc; i += 4, idx += 1)
   {
-    s_pc[idx] = hc_swap32_S (salt_bufs[salt_pos].salt_buf_pc[idx]);
+    s_pc[idx] = hc_swap32_S (salt_bufs[SALT_POS].salt_buf_pc[idx]);
   }
 
-  const u32 salt_iter = salt_bufs[salt_pos].salt_iter;
+  const u32 salt_iter = salt_bufs[SALT_POS].salt_iter;
 
   /**
    * loop
@@ -174,13 +224,27 @@ KERNEL_FQ void m08300_sxx (KERN_ATTR_BASIC ())
 
     sha1_init (&ctx1);
 
-    ctx1.w0[0] = ((pws[gid].pw_len + combs_buf[il_pos].pw_len) & 0xff) << 24;
+    const u32 pw_len = pws[gid].pw_len + combs_buf[il_pos].pw_len;
 
-    ctx1.len = 1;
+    // replace "." with the length:
 
-    sha1_update_global_swap (&ctx1, pws[gid].i, pws[gid].pw_len);
+    if (pw_len > 0)
+    {
+      pw_t combs;
 
-    sha1_update_global_swap (&ctx1, combs_buf[il_pos].i, combs_buf[il_pos].pw_len);
+      const u32 first_len_combs = replace_dot_by_len (&combs, &combs_buf[il_pos], 0);
+
+      pw_t pw;
+
+      const u32 first_len_pw = replace_dot_by_len (&pw, &pws[gid], first_len_combs);
+
+      ctx1.w0[0] = (first_len_pw & 0xff) << 24;
+
+      ctx1.len = 1;
+
+      sha1_update_swap (&ctx1, pw.i,    pw.pw_len);
+      sha1_update_swap (&ctx1, combs.i, combs.pw_len);
+    }
 
     sha1_update (&ctx1, s_pc, salt_len_pc + 1);
 
